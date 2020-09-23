@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>集群redis</title>
+</head>
+<style>
+    .p1{
+
+    }
+    .key{
+        margin:0;
+        padding:0;
+        cursor: pointer;
+        word-wrap: break-word;
+        word-break: break-all;
+        display: inline;
+    }
+    .key:hover{
+        background-color: #ffff00;
+    }
+    .del{
+        cursor: pointer;
+    }
+</style>
+<link rel="stylesheet" href="/static/css/font-awesome-4.7.0/css/font-awesome.min.css">
+<body>
+
+<div style="margin: 10px auto;width: 95%;">
+    <form action="#" method="get">
+        服务器：<select name="redis">
+                    {foreach $list as $k => $vo }
+                    <option value="{$k}" {eq name="redis" value="$k"} selected {/eq}>{$vo}</option>
+                    {/foreach}
+               </select>
+        库号：<input name="database" class="database" type="number" data-value="{$database}" value="{$database}"/>
+        过滤：<input name="filter" type="text" value="{$filter}"/>
+        <input type="submit" value="查询">
+        <input type="reset" value="重置">
+    </form>
+</div>
+<div style="margin: 10px auto;width: 95%;">
+    <div style="width: 20%;float: left;overflow: auto;height: 80vh;">
+        <p class="p1">keys：&nbsp;&nbsp;&nbsp;&nbsp;<input id="reload" type="button" value="刷新" /></p>
+        {volist name="keys" id="vo"}
+        <div>
+            <p style="display:inline;"><i class="fa fa-trash del" style="color: red;" aria-hidden="true"></i></p>
+            <p class="key" data-value="{$vo}">{$vo}</p>
+        </div>
+        {/volist}
+    </div>
+    <div style="width: 79%;float: left;overflow: auto;height: 80vh;">
+        <iframe id="myiframe" src="/index/detail" width="99%" height="98%"></iframe>
+    </div>
+</div>
+
+</body>
+</html>
+
+<script src="/static/js/jquery-3.5.1.min.js"></script>
+<script>
+    $('.key').click(function (e) {
+        $('.key').each(function () {
+            $(this).css('background-color', '');
+        });
+        $(this).css('background-color', '#ffff00');
+        let key = $(this).data('value');
+        let database = $('.database').data('value');
+        $("#myiframe").attr("src", '/index/detail/database/' + database +'/key/' + key);
+    });
+    $('#reload').click(function () {
+        location.reload();
+    });
+    $('.del').click(function () {
+        if (confirm('确定删除？')) {
+            let key = $(this).parent().next().data('value');
+            let database = $('.database').data('value');
+            $.ajax({
+                type : "POST",
+                async: false,
+                contentType: "application/json;charset=UTF-8",
+                url : "/index/del",
+                dataType: "json",
+                data : JSON.stringify({database:database, key:key}),
+                success : function(result) {
+                    console.log(result);
+                },
+                error : function(e){
+                    console.log(e.status);
+                    console.log(e.responseText);
+                }
+            });
+            $(this).parent().parent().remove();
+        }
+    });
+</script>

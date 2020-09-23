@@ -1,17 +1,97 @@
 <?php
+
 namespace app\controller;
 
 use app\BaseController;
+use app\library\RedisConfig;
+use app\library\Redis;
+use think\facade\View;
 
 class Index extends BaseController
 {
     public function index()
     {
-        return '<style type="text/css">*{ padding: 0; margin: 0; } div{ padding: 4px 48px;} a{color:#2E5CD5;cursor: pointer;text-decoration: none} a:hover{text-decoration:underline; } body{ background: #fff; font-family: "Century Gothic","Microsoft yahei"; color: #333;font-size:18px;} h1{ font-size: 100px; font-weight: normal; margin-bottom: 12px; } p{ line-height: 1.6em; font-size: 42px }</style><div style="padding: 24px 48px;"> <h1>:) </h1><p> ThinkPHP V' . \think\facade\App::version() . '<br/><span style="font-size:30px;">14载初心不改 - 你值得信赖的PHP框架</span></p><span style="font-size:25px;">[ V6.0 版本由 <a href="https://www.yisu.com/" target="yisu">亿速云</a> 独家赞助发布 ]</span></div><script type="text/javascript" src="https://tajs.qq.com/stats?sId=64890268" charset="UTF-8"></script><script type="text/javascript" src="https://e.topthink.com/Public/static/client.js"></script><think id="ee9b1aa918103c4fc"></think>';
+        $list = RedisConfig::getList();
+        View::assign('list', $list);
+        $redis = $this->request->param('redis');
+        View::assign('redis', $redis);
+        if ($redis) {
+            $database = $this->request->param('database', '');
+            $filter = $this->request->param('filter', '*');
+            $filter = $filter ? $filter : '*';
+            View::assign('database', $database);
+            View::assign('filter', $filter);
+            $keys = [];
+            if (is_numeric($database)) {
+                $client = Redis::getClient($redis);
+                $keys = Redis::getKeys($redis, $database, $filter);
+            }
+            View::assign('keys', $keys);
+
+        } else {
+            View::assign('database', '');
+            View::assign('filter', '');
+            View::assign('keys', []);
+        }
+        return View::fetch();
     }
 
-    public function hello($name = 'ThinkPHP6')
+    public function detail()
     {
-        return 'hello,' . $name;
+        $database = $this->request->param('database', '');
+        $key = $this->request->param('key', '');
+        $type = '';
+        $ttl = '';
+        $re = '';
+        $view = 'blank';
+        if (is_numeric($database) && $key) {
+            try {
+                $client = $this->getClient();
+                $client->select((int)$database);
+                $type = $client->type($key);
+                switch ($type) {
+                    case 0:
+                        $type = '';
+                        $re = 'key不存在';
+                        break;
+                    case 3:
+                        $type = 'list';
+                        $view = 'list';
+                        $re = $client->lrange($key, 0, -1);
+                        break;
+                    case 5:
+                        $type = 'hash';
+                        $view = 'hash';
+                        $re = $client->hgetall($key);
+                        break;
+                    case 4:
+                        $type = 'zset';
+                        $view = 'zset';
+                        $re = $client->zrange($key, 0, -1, true);
+                        break;
+                    case 2:
+                        $type = 'set';
+                        $view = 'set';
+                        $re = $client->smembers($key);
+                        break;
+                    default:
+                        $type = 'string';
+                        $view = 'string';
+                        $re = $client->get($key);
+                        break;
+                }
+                if ($type) {
+                    $ttl = $client->ttl($key);
+                }
+            } catch (\Exception $e) {
+                dump($e->getMessage());
+            }
+        }
+        View::assign('key', $key);
+        View::assign('type', $type);
+        View::assign('ttl', $ttl);
+        View::assign('re', $re);
+        return View::fetch($view);
     }
+
 }
