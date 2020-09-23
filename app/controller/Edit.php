@@ -3,95 +3,21 @@
 namespace app\controller;
 
 use app\BaseController;
-use app\library\RedisConfig;
-use app\library\Redis;
-use think\facade\View;
 
-class Index extends BaseController
+class Edit extends BaseController
 {
-    public function index()
-    {
-        $list = RedisConfig::getList();
-        View::assign('list', $list);
-        $redis = $this->request->param('redis');
-        View::assign('redis', $redis);
-        if ($redis) {
-            $database = $this->request->param('database', '');
-            $filter = $this->request->param('filter', '*');
-            $filter = $filter ? $filter : '*';
-            View::assign('database', $database);
-            View::assign('filter', $filter);
-            $keys = [];
-            if (is_numeric($database)) {
-                $keys = Redis::getKeys($redis, $database, $filter);
-            }
-            View::assign('keys', $keys);
+    protected $redis;
+    protected $database;
+    protected $key;
 
-        } else {
-            View::assign('database', '');
-            View::assign('filter', '');
-            View::assign('keys', []);
-        }
-        return View::fetch();
-    }
-
-    public function detail()
+    protected function initialize()
     {
-        $redis = $this->request->param('redis');
-        $database = $this->request->param('database', '');
-        $key = $this->request->param('key', '');
-        $type = '';
-        $ttl = '';
-        $re = '';
-        $view = 'blank';
-        if (is_numeric($database) && $key) {
-            try {
-                $client = Redis::getClient($redis);
-                $client->select((int)$database);
-                $type = $client->type($key);
-                switch ($type) {
-                    case 0:
-                        $type = '';
-                        $re = 'key不存在';
-                        break;
-                    case 3:
-                        $type = 'list';
-                        $view = 'list';
-                        $re = $client->lrange($key, 0, -1);
-                        break;
-                    case 5:
-                        $type = 'hash';
-                        $view = 'hash';
-                        $re = $client->hgetall($key);
-                        break;
-                    case 4:
-                        $type = 'zset';
-                        $view = 'zset';
-                        $re = $client->zrange($key, 0, -1, true);
-                        break;
-                    case 2:
-                        $type = 'set';
-                        $view = 'set';
-                        $re = $client->smembers($key);
-                        break;
-                    default:
-                        $type = 'string';
-                        $view = 'string';
-                        $re = $client->get($key);
-                        break;
-                }
-                if ($type) {
-                    $ttl = $client->ttl($key);
-                }
-            } catch (\Exception $e) {
-                dump($e->getMessage());
-            }
+        $this->redis = $this->request->param('redis', '');
+        $this->database = $this->request->post('database', '');
+        $this->key = $this->request->post('key', '');
+        if ($this->redis === '' || $this->database === '' || $this->key === '') {
+            $this->error();
         }
-        View::assign('key', $key);
-        View::assign('type', $type);
-        View::assign('ttl', $ttl);
-        View::assign('re', $re);
-        return View::fetch($view);
     }
 
     public function del()
@@ -367,5 +293,23 @@ class Index extends BaseController
             }
         }
         return json($return);
+    }
+
+    protected function success($data = [], $msg = '操作成功', $code = 1)
+    {
+        return json([
+            'code' => $code,
+            'msg' => $msg,
+            'data' => $data,
+        ]);
+    }
+
+    protected function error($msg = '操作失败', $code = 0, $data = [])
+    {
+        return json([
+            'code' => $code,
+            'msg' => $msg,
+            'data' => $data,
+        ]);
     }
 }

@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>集群redis</title>
+    <script src="/static/js/jquery-3.5.1.min.js"></script>
+</head>
+<style>
+    p{
+        display: inline;
+    }
+    textarea{
+        resize: none;
+    }
+    .del{
+        cursor: pointer;
+    }
+</style>
+<link rel="stylesheet" href="/static/css/font-awesome-4.7.0/css/font-awesome.min.css">
+<body>
+
+<div>
+    <div>
+        <p class="key" data-value="{$key|default=''}">{$key|default=""}</p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <p>类型：{$type|default=""}</p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <p>过期：<label for="ttl"></label><input type="number" id="ttl" value="{$ttl|default=''}" /></p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <p><input type="button" class="ttl" value="保存" /></p>
+    </div>
+    <div style="margin-top: 10px;">
+        {foreach $re as $k => $vo }
+        <div style="margin-top: 8px;">
+            <p class="k" data-value="{$k}">{$k}</p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <p><i class="fa fa-trash del" style="color: red;" aria-hidden="true"></i></p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <p><input type="button" class="save" value="保存" /></p>
+            <p>
+                <label>
+                    <textarea rows="3" style="width: 99%;height: 90%;" class="list">{$vo|default=""}</textarea>
+                </label>
+            </p>
+        </div>
+        {/foreach}
+    </div>
+</div>
+
+</body>
+</html>
+<script type="text/javascript">
+    $('.save').click(function () {
+        let database = $('.database', parent.document).data('value');
+        let key = $('.key').data('value');
+        let k = $(this).parent().prev().prev().data('value');
+        let string = $(this).parent().next().children().children('textarea').val();
+        $.ajax({
+            type : "POST",
+            async: false,
+            contentType: "application/json;charset=UTF-8",
+            url : "/index/editHash",
+            dataType: "json",
+            data : JSON.stringify({database:database, key:key, k:k, string:string}),
+            success : function(result) {
+                if (result.code == 1) {
+                    alert(result.msg);
+                    location.reload();
+                } else {
+                    alert(result.msg);
+                }
+            },
+            error : function(e){
+                console.log(e.status);
+                console.log(e.responseText);
+            }
+        });
+    });
+    $('.del').click(function () {
+        if (confirm('确定删除？')) {
+            let database = $('.database', parent.document).data('value');
+            let key = $('.key').data('value');
+            let k = $(this).parent().prev().data('value');
+            $.ajax({
+                type : "POST",
+                async: false,
+                contentType: "application/json;charset=UTF-8",
+                url : "/index/delHash",
+                dataType: "json",
+                data : JSON.stringify({database:database, key:key, k:k}),
+                success : function(result) {
+                    if (result.code == 1) {
+                        alert(result.msg);
+                        location.reload();
+                    } else {
+                        alert(result.msg);
+                    }
+                },
+                error : function(e){
+                    console.log(e.status);
+                    console.log(e.responseText);
+                }
+            });
+        }
+    });
+    $('.ttl').click(function () {
+        let database = $('.database', parent.document).data('value');
+        let key = $('.key').data('value');
+        let ttl = $('#ttl').val();
+        $.ajax({
+            type : "POST",
+            async: false,
+            contentType: "application/json;charset=UTF-8",
+            url : "/index/ttl",
+            dataType: "json",
+            data : JSON.stringify({database:database, key:key, ttl:ttl}),
+            success : function(result) {
+                if (result.code == 1) {
+                    alert(result.msg);
+                    location.reload();
+                } else {
+                    alert(result.msg);
+                }
+            },
+            error : function(e){
+                console.log(e.status);
+                console.log(e.responseText);
+            }
+        });
+    });
+</script>
