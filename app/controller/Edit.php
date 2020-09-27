@@ -3,296 +3,129 @@
 namespace app\controller;
 
 use app\BaseController;
+use app\library\Redis;
 
 class Edit extends BaseController
 {
-    protected $redis;
-    protected $database;
+    /**
+     * @var \Redis
+     */
+    protected $client;
     protected $key;
 
     protected function initialize()
     {
-        $this->redis = $this->request->param('redis', '');
-        $this->database = $this->request->post('database', '');
+        $redis = $this->request->post('redis', '');
+        $database = $this->request->post('database', '');
         $this->key = $this->request->post('key', '');
-        if ($this->redis === '' || $this->database === '' || $this->key === '') {
+        if ($redis === '' || !is_numeric($database) || $this->key === '') {
             $this->error();
         }
+        $this->client = Redis::getClient($redis);
+        $this->client->select((int)$database);
     }
 
-    public function del()
+    protected function del()
     {
-        $return = [
-            'code' => 0,
-            'msg' => '操作失败',
-        ];
-        $redis = $this->request->param('redis');
-        $database = $this->request->post('database', '');
-        $key = $this->request->post('key', '');
-        if (is_numeric($database) && $key !== '') {
-            try {
-                $client = Redis::getClient($redis);
-                $client->select((int)$database);
-                $client->del($key);
-                $return = [
-                    'code' => 1,
-                    'msg' => '操作成功',
-                ];
-            } catch (\Exception $e) {
-                $return['msg'] = $e->getMessage();
-            }
+        if ($this->client->del($this->key)) {
+            $this->success();
         }
-        return json($return);
+        $this->error();
     }
 
-    public function string()
+    protected function string()
     {
-        $return = [
-            'code' => 0,
-            'msg' => '操作失败',
-        ];
-        $redis = $this->request->param('redis');
-        $database = $this->request->post('database', '');
-        $key = $this->request->post('key', '');
         $string = $this->request->post('string', '');
-        if (is_numeric($database) && $key !== '') {
-            try {
-                $client = Redis::getClient($redis);
-                $client->select((int)$database);
-                if ($client->set($key, $string)) {
-                    $return = [
-                        'code' => 1,
-                        'msg' => '操作成功',
-                    ];
-                }
-            } catch (\Exception $e) {
-                $return['msg'] = $e->getMessage();
-            }
+        if ($this->client->set($this->key, $string)) {
+            $this->success();
         }
-        return json($return);
+        $this->error();
     }
 
-    public function editList()
+    protected function editList()
     {
-        $return = [
-            'code' => 0,
-            'msg' => '操作失败',
-        ];
-        $redis = $this->request->param('redis');
-        $database = $this->request->post('database', '');
-        $key = $this->request->post('key', '');
         $k = $this->request->post('k', '');
         $string = $this->request->post('string', '');
-        if (is_numeric($database) && $key !== '' && is_numeric($k)) {
-            try {
-                $client = Redis::getClient($redis);
-                $client->select((int)$database);
-                if ($client->lSet($key, $k, $string)) {
-                    $return = [
-                        'code' => 1,
-                        'msg' => '操作成功',
-                    ];
-                }
-            } catch (\Exception $e) {
-                $return['msg'] = $e->getMessage();
-            }
+        if (is_numeric($k) && $this->client->lSet($this->key, $k, $string)) {
+            $this->success();
         }
-        return json($return);
+        $this->error();
     }
 
-    public function delList()
+    protected function delList()
     {
-        $return = [
-            'code' => 0,
-            'msg' => '操作失败',
-        ];
-        $redis = $this->request->param('redis');
-        $database = $this->request->post('database', '');
-        $key = $this->request->post('key', '');
         $k = $this->request->post('k', '');
-        if (is_numeric($database) && $key !== '' && is_numeric($k)) {
-            try {
-                $client = Redis::getClient($redis);
-                $client->select((int)$database);
-                $string = '---delete---';
-                $client->lSet($key, $k, $string);
-                if ($client->lRem($key, $string, 0)) {
-                    $return = [
-                        'code' => 1,
-                        'msg' => '操作成功',
-                    ];
-                }
-            } catch (\Exception $e) {
-                $return['msg'] = $e->getMessage();
+        if (is_numeric($k)) {
+            $string = '---delete---';
+            $this->client->lSet($this->key, $k, $string);
+            if ($this->client->lRem($this->key, $string, 0)) {
+                $this->success();
             }
         }
-        return json($return);
+        $this->error();
     }
 
-    public function editHash()
+    protected function editHash()
     {
-        $return = [
-            'code' => 0,
-            'msg' => '操作失败',
-        ];
-        $redis = $this->request->param('redis');
-        $database = $this->request->post('database', '');
-        $key = $this->request->post('key', '');
         $k = $this->request->post('k', '');
         $string = $this->request->post('string', '');
-        if (is_numeric($database) && $key !== '' && $k !== '') {
-            try {
-                $client = Redis::getClient($redis);
-                $client->select((int)$database);
-                if (false !== $client->hSet($key, $k, $string)) {
-                    $return = [
-                        'code' => 1,
-                        'msg' => '操作成功',
-                    ];
-                }
-            } catch (\Exception $e) {
-                $return['msg'] = $e->getMessage();
-            }
+        if (($k !== '') && (false !== $this->client->hSet($this->key, $k, $string))) {
+            $this->success();
         }
-        return json($return);
+        $this->error();
     }
 
-    public function delHash()
+    protected function delHash()
     {
-        $return = [
-            'code' => 0,
-            'msg' => '操作失败',
-        ];
-        $redis = $this->request->param('redis');
-        $database = $this->request->post('database', '');
-        $key = $this->request->post('key', '');
         $k = $this->request->post('k', '');
-        if (is_numeric($database) && $key !== '' && $k !== '') {
-            try {
-                $client = Redis::getClient($redis);
-                $client->select((int)$database);
-                if ($client->hDel($key, $k)) {
-                    $return = [
-                        'code' => 1,
-                        'msg' => '操作成功',
-                    ];
-                }
-            } catch (\Exception $e) {
-                $return['msg'] = $e->getMessage();
-            }
+        if (($k !== '') && ($this->client->hDel($this->key, $k))) {
+            $this->success();
         }
-        return json($return);
+        $this->error();
     }
 
-    public function delSet()
+    protected function delSet()
     {
-        $return = [
-            'code' => 0,
-            'msg' => '操作失败',
-        ];
-        $redis = $this->request->param('redis');
-        $database = $this->request->post('database', '');
-        $key = $this->request->post('key', '');
         $set = $this->request->post('set', '');
-        if (is_numeric($database) && $key !== '' && $set !== '') {
-            try {
-                $client = Redis::getClient($redis);
-                $client->select((int)$database);
-                if ($client->sRem($key, $set)) {
-                    $return = [
-                        'code' => 1,
-                        'msg' => '操作成功',
-                    ];
-                }
-            } catch (\Exception $e) {
-                $return['msg'] = $e->getMessage();
-            }
+        if (($set !== '') && ($this->client->sRem($this->key, $set))) {
+            $this->success();
         }
-        return json($return);
+        $this->error();
     }
 
-    public function editZset()
+    protected function editZset()
     {
-        $return = [
-            'code' => 0,
-            'msg' => '操作失败',
-        ];
-        $redis = $this->request->param('redis');
-        $database = $this->request->post('database', '');
-        $key = $this->request->post('key', '');
         $k = $this->request->post('k', '');
         $score = $this->request->post('score', '');
-        if (is_numeric($database) && $key !== '' && $k !== '') {
-            try {
-                $client = Redis::getClient($redis);
-                $client->select((int)$database);
-                $client->zAdd($key, ['XX'], $score, $k);
-                $return = [
-                    'code' => 1,
-                    'msg' => '操作成功',
-                ];
-            } catch (\Exception $e) {
-                $return['msg'] = $e->getMessage();
-            }
+        if (($k !== '') && is_numeric($score) && ($this->client->zAdd($this->key, ['XX'], $score, $k))) {
+            $this->success();
         }
-        return json($return);
+        $this->error();
     }
 
-    public function delZset()
+    protected function delZset()
     {
-        $return = [
-            'code' => 0,
-            'msg' => '操作失败',
-        ];
-        $redis = $this->request->param('redis');
-        $database = $this->request->post('database', '');
-        $key = $this->request->post('key', '');
         $k = $this->request->post('k', '');
-        if (is_numeric($database) && $key !== '' && $k !== '') {
-            try {
-                $client = Redis::getClient($redis);
-                $client->select((int)$database);
-                $client->zRem($key, $k);
-                $return = [
-                    'code' => 1,
-                    'msg' => '操作成功',
-                ];
-            } catch (\Exception $e) {
-                $return['msg'] = $e->getMessage();
-            }
+        if (($k !== '') && $this->client->zRem($this->key, $k)) {
+            $this->success();
         }
-        return json($return);
+        $this->error();
     }
 
-    public function ttl()
+    protected function ttl()
     {
-        $return = [
-            'code' => 0,
-            'msg' => '操作失败',
-        ];
-        $redis = $this->request->param('redis');
-        $database = $this->request->post('database', '');
-        $key = $this->request->post('key', '');
-        $ttl = $this->request->post('ttl', -1);
-        if (is_numeric($database) && $key !== '' && is_numeric($ttl)) {
-            try {
-                $client = Redis::getClient($redis);
-                $client->select((int)$database);
-                $ttl = (int)$ttl;
-                if ($ttl <= 0) {
-                    $client->persist($key);
-                } else {
-                    $client->expire($key, $ttl);
-                }
-                $return = [
-                    'code' => 1,
-                    'msg' => '操作成功',
-                ];
-            } catch (\Exception $e) {
-                $return['msg'] = $e->getMessage();
+        $ttl = (int)$this->request->post('ttl', -1);
+        if (is_numeric($ttl)) {
+            if ($ttl <= 0) {
+                $re = $this->client->persist($this->key);
+            } else {
+                $re = $this->client->expire($this->key, $ttl);
+            }
+            if ($re) {
+                $this->success();
             }
         }
-        return json($return);
+        $this->error();
     }
 
     protected function success($data = [], $msg = '操作成功', $code = 1)
