@@ -4,6 +4,8 @@ namespace app\controller;
 
 use app\BaseController;
 use app\library\Redis;
+use think\exception\HttpResponseException;
+use think\Response;
 
 class Edit extends BaseController
 {
@@ -25,7 +27,7 @@ class Edit extends BaseController
         $this->client->select((int)$database);
     }
 
-    protected function del()
+    public function del()
     {
         if ($this->client->del($this->key)) {
             $this->success();
@@ -33,7 +35,7 @@ class Edit extends BaseController
         $this->error();
     }
 
-    protected function string()
+    public function string()
     {
         $string = $this->request->post('string', '');
         if ($this->client->set($this->key, $string)) {
@@ -42,7 +44,7 @@ class Edit extends BaseController
         $this->error();
     }
 
-    protected function editList()
+    public function editList()
     {
         $k = $this->request->post('k', '');
         $string = $this->request->post('string', '');
@@ -52,7 +54,7 @@ class Edit extends BaseController
         $this->error();
     }
 
-    protected function delList()
+    public function delList()
     {
         $k = $this->request->post('k', '');
         if (is_numeric($k)) {
@@ -65,7 +67,7 @@ class Edit extends BaseController
         $this->error();
     }
 
-    protected function editHash()
+    public function editHash()
     {
         $k = $this->request->post('k', '');
         $string = $this->request->post('string', '');
@@ -75,7 +77,7 @@ class Edit extends BaseController
         $this->error();
     }
 
-    protected function delHash()
+    public function delHash()
     {
         $k = $this->request->post('k', '');
         if (($k !== '') && ($this->client->hDel($this->key, $k))) {
@@ -84,7 +86,7 @@ class Edit extends BaseController
         $this->error();
     }
 
-    protected function delSet()
+    public function delSet()
     {
         $set = $this->request->post('set', '');
         if (($set !== '') && ($this->client->sRem($this->key, $set))) {
@@ -93,17 +95,18 @@ class Edit extends BaseController
         $this->error();
     }
 
-    protected function editZset()
+    public function editZset()
     {
         $k = $this->request->post('k', '');
         $score = $this->request->post('score', '');
-        if (($k !== '') && is_numeric($score) && ($this->client->zAdd($this->key, ['XX'], $score, $k))) {
+        if (($k !== '') && is_numeric($score)) {
+            $this->client->zAdd($this->key, ['XX'], $score, $k);
             $this->success();
         }
         $this->error();
     }
 
-    protected function delZset()
+    public function delZset()
     {
         $k = $this->request->post('k', '');
         if (($k !== '') && $this->client->zRem($this->key, $k)) {
@@ -112,7 +115,7 @@ class Edit extends BaseController
         $this->error();
     }
 
-    protected function ttl()
+    public function ttl()
     {
         $ttl = (int)$this->request->post('ttl', -1);
         if (is_numeric($ttl)) {
@@ -130,19 +133,21 @@ class Edit extends BaseController
 
     protected function success($data = [], $msg = '操作成功', $code = 1)
     {
-        return json([
-            'code' => $code,
-            'msg' => $msg,
-            'data' => $data,
-        ]);
+        $this->result($code, $data, $msg);
     }
 
     protected function error($msg = '操作失败', $code = 0, $data = [])
     {
-        return json([
+        $this->result($code, $data, $msg);
+    }
+
+    private function result($code, $data, $msg)
+    {
+        $data = [
             'code' => $code,
-            'msg' => $msg,
             'data' => $data,
-        ]);
+            'msg' => $msg,
+        ];
+        throw new HttpResponseException(Response::create($data, 'json', 200));
     }
 }

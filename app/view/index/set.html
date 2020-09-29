@@ -44,18 +44,19 @@
 </body>
 </html>
 <script type="text/javascript">
+    let redis = $('.redis', parent.document).data('value');
+    let database = $('.database', parent.document).data('value');
+    let key = $('.key').data('value');
     $('.del').click(function () {
         if (confirm('确定删除？')) {
-            let database = $('.database', parent.document).data('value');
-            let key = $('.key').data('value');
             let set = $(this).parent().next().children().children('textarea').val();
             $.ajax({
                 type : "POST",
                 async: false,
                 contentType: "application/json;charset=UTF-8",
-                url : "/index/delSet",
+                url : "/edit/delSet",
                 dataType: "json",
-                data : JSON.stringify({database:database, key:key, set:set}),
+                data : JSON.stringify({redis:redis, database:database, key:key, set:set}),
                 success : function(result) {
                     if (result.code == 1) {
                         alert(result.msg);
@@ -72,16 +73,14 @@
         }
     });
     $('.ttl').click(function () {
-        let database = $('.database', parent.document).data('value');
-        let key = $('.key').data('value');
         let ttl = $('#ttl').val();
         $.ajax({
             type : "POST",
             async: false,
             contentType: "application/json;charset=UTF-8",
-            url : "/index/ttl",
+            url : "/edit/ttl",
             dataType: "json",
-            data : JSON.stringify({database:database, key:key, ttl:ttl}),
+            data : JSON.stringify({redis:redis, database:database, key:key, ttl:ttl}),
             success : function(result) {
                 if (result.code == 1) {
                     alert(result.msg);

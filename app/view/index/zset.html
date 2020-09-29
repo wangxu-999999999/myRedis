@@ -54,18 +54,19 @@
 </body>
 </html>
 <script type="text/javascript">
+    let redis = $('.redis', parent.document).data('value');
+    let database = $('.database', parent.document).data('value');
+    let key = $('.key').data('value');
     $('.save').click(function () {
-        let database = $('.database', parent.document).data('value');
-        let key = $('.key').data('value');
         let k = $(this).parent().parent().prev().children('p').data('value');
         let score = $(this).parent().prev().children('input').val();
         $.ajax({
             type : "POST",
             async: false,
             contentType: "application/json;charset=UTF-8",
-            url : "/index/editZset",
+            url : "/edit/editZset",
             dataType: "json",
-            data : JSON.stringify({database:database, key:key, k:k, score:score}),
+            data : JSON.stringify({redis:redis, database:database, key:key, k:k, score:score}),
             success : function(result) {
                 if (result.code == 1) {
                     alert(result.msg);
@@ -82,16 +83,14 @@
     });
     $('.del').click(function () {
         if (confirm('确定删除？')) {
-            let database = $('.database', parent.document).data('value');
-            let key = $('.key').data('value');
             let k = $(this).parent().parent().prev().children('p').data('value');
             $.ajax({
                 type : "POST",
                 async: false,
                 contentType: "application/json;charset=UTF-8",
-                url : "/index/delZset",
+                url : "/edit/delZset",
                 dataType: "json",
-                data : JSON.stringify({database:database, key:key, k:k}),
+                data : JSON.stringify({redis:redis, database:database, key:key, k:k}),
                 success : function(result) {
                     if (result.code == 1) {
                         alert(result.msg);
@@ -108,16 +107,14 @@
         }
     });
     $('.ttl').click(function () {
-        let database = $('.database', parent.document).data('value');
-        let key = $('.key').data('value');
         let ttl = $('#ttl').val();
         $.ajax({
             type : "POST",
             async: false,
             contentType: "application/json;charset=UTF-8",
-            url : "/index/ttl",
+            url : "/edit/ttl",
             dataType: "json",
-            data : JSON.stringify({database:database, key:key, ttl:ttl}),
+            data : JSON.stringify({redis:redis, database:database, key:key, ttl:ttl}),
             success : function(result) {
                 if (result.code == 1) {
                     alert(result.msg);
