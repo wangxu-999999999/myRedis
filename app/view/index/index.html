@@ -93,4 +93,8 @@
             $(this).parent().parent().remove();
         }
     });
+    $(".redis").change(function() {
+        let newRedis = $(".redis option:selected").val();
+        window.location.href = "/?redis=" + newRedis;
+    });
 </script>
