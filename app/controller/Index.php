@@ -6,9 +6,16 @@ use app\BaseController;
 use app\library\RedisConfig;
 use app\library\Redis;
 use think\facade\View;
+use think\Exception;
 
 class Index extends BaseController
 {
+    /**
+     * @return string
+     * @throws Exception
+     * @author WX
+     * @datetime 2020/10/9 16:24
+     */
     public function index()
     {
         $list = RedisConfig::getList();
@@ -35,6 +42,11 @@ class Index extends BaseController
         return View::fetch();
     }
 
+    /**
+     * @return string
+     * @author WX
+     * @datetime 2020/10/9 16:24
+     */
     public function detail()
     {
         $redis = $this->request->param('redis');
@@ -83,7 +95,7 @@ class Index extends BaseController
                 if ($type) {
                     $ttl = $client->ttl($key);
                 }
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 dump($e->getMessage());
             }
         }

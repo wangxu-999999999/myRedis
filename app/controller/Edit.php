@@ -4,6 +4,7 @@ namespace app\controller;
 
 use app\BaseController;
 use app\library\Redis;
+use think\Exception;
 use think\exception\HttpResponseException;
 use think\Response;
 
@@ -15,6 +16,11 @@ class Edit extends BaseController
     protected $client;
     protected $key;
 
+    /**
+     * 初始化方法
+     * @author WX
+     * @datetime 2020/10/9 16:23
+     */
     protected function initialize()
     {
         $redis = $this->request->post('redis', '');
@@ -23,10 +29,18 @@ class Edit extends BaseController
         if ($redis === '' || !is_numeric($database) || $this->key === '') {
             $this->error();
         }
-        $this->client = Redis::getClient($redis);
+        try {
+            $this->client = Redis::getClient($redis);
+        } catch (Exception $e) {
+            $this->error($e->getMessage());
+        }
         $this->client->select((int)$database);
     }
 
+    /**
+     * @author WX
+     * @datetime 2020/10/9 16:19
+     */
     public function del()
     {
         if ($this->client->del($this->key)) {
@@ -35,6 +49,10 @@ class Edit extends BaseController
         $this->error();
     }
 
+    /**
+     * @author WX
+     * @datetime 2020/10/9 16:19
+     */
     public function string()
     {
         $string = $this->request->post('string', '');
@@ -44,6 +62,10 @@ class Edit extends BaseController
         $this->error();
     }
 
+    /**
+     * @author WX
+     * @datetime 2020/10/9 16:20
+     */
     public function editList()
     {
         $k = $this->request->post('k', '');
@@ -54,6 +76,10 @@ class Edit extends BaseController
         $this->error();
     }
 
+    /**
+     * @author WX
+     * @datetime 2020/10/9 16:20
+     */
     public function delList()
     {
         $k = $this->request->post('k', '');
@@ -67,6 +93,10 @@ class Edit extends BaseController
         $this->error();
     }
 
+    /**
+     * @author WX
+     * @datetime 2020/10/9 16:20
+     */
     public function editHash()
     {
         $k = $this->request->post('k', '');
@@ -77,6 +107,10 @@ class Edit extends BaseController
         $this->error();
     }
 
+    /**
+     * @author WX
+     * @datetime 2020/10/9 16:20
+     */
     public function delHash()
     {
         $k = $this->request->post('k', '');
@@ -86,6 +120,10 @@ class Edit extends BaseController
         $this->error();
     }
 
+    /**
+     * @author WX
+     * @datetime 2020/10/9 16:20
+     */
     public function delSet()
     {
         $set = $this->request->post('set', '');
@@ -95,6 +133,10 @@ class Edit extends BaseController
         $this->error();
     }
 
+    /**
+     * @author WX
+     * @datetime 2020/10/9 16:20
+     */
     public function editZset()
     {
         $k = $this->request->post('k', '');
@@ -106,6 +148,10 @@ class Edit extends BaseController
         $this->error();
     }
 
+    /**
+     * @author WX
+     * @datetime 2020/10/9 16:20
+     */
     public function delZset()
     {
         $k = $this->request->post('k', '');
@@ -115,6 +161,10 @@ class Edit extends BaseController
         $this->error();
     }
 
+    /**
+     * @author WX
+     * @datetime 2020/10/9 16:20
+     */
     public function ttl()
     {
         $ttl = (int)$this->request->post('ttl', -1);
@@ -131,16 +181,37 @@ class Edit extends BaseController
         $this->error();
     }
 
+    /**
+     * @param array $data
+     * @param string $msg
+     * @param int $code
+     * @author WX
+     * @datetime 2020/10/9 16:20
+     */
     protected function success($data = [], $msg = '操作成功', $code = 1)
     {
         $this->result($code, $data, $msg);
     }
 
+    /**
+     * @param  $msg
+     * @param int $code
+     * @param array $data
+     * @author WX
+     * @datetime 2020/10/9 16:20
+     */
     protected function error($msg = '操作失败', $code = 0, $data = [])
     {
         $this->result($code, $data, $msg);
     }
 
+    /**
+     * @param int $code
+     * @param array $data
+     * @param string $msg
+     * @author WX
+     * @datetime 2020/10/9 16:20
+     */
     private function result($code, $data, $msg)
     {
         $data = [
