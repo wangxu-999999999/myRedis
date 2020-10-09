@@ -1,16 +1,15 @@
 {
     "name": "wangxu-999999999/myredis",
-    "description": "myRedis",
+    "description": "the redis manage tool",
     "type": "project",
     "keywords": [
         "redis"
     ],
-    "homepage": "",
     "license": "Apache-2.0",
     "authors": [
         {
             "name": "wangxu",
-            "email": ""
+            "email": "1274674127@qq.com"
         }
     ],
     "require": {
