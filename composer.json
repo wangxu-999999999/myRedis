@@ -1,6 +1,6 @@
 {
-    "name": "topthink/think",
-    "description": "the new thinkphp framework",
+    "name": "wx/myRedis",
+    "description": "myRedis",
     "type": "project",
     "keywords": [
         "framework",
