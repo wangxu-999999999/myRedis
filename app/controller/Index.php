@@ -1,5 +1,7 @@
 <?php
 
+declare (strict_types = 1);
+
 namespace app\controller;
 
 use app\BaseController;
@@ -34,7 +36,7 @@ class Index extends BaseController
             View::assign('filter', $filter);
             $keys = [];
             if (is_numeric($database)) {
-                $keys = Redis::getKeys($redis, $database, $filter);
+                $keys = Redis::getKeys($redis, (int)$database, $filter);
             }
             View::assign('keys', $keys);
 

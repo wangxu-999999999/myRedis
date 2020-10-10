@@ -1,5 +1,7 @@
 <?php
 
+declare (strict_types = 1);
+
 namespace app\controller;
 
 use app\BaseController;
@@ -196,19 +198,19 @@ class Edit extends BaseController
      * @author WX
      * @datetime 2020/10/9 16:20
      */
-    protected function success($data = [], $msg = '操作成功', $code = 1)
+    protected function success(array $data = [], string $msg = '操作成功', int $code = 1)
     {
         $this->result($code, $data, $msg);
     }
 
     /**
-     * @param  $msg
+     * @param string $msg
      * @param int $code
      * @param array $data
      * @author WX
      * @datetime 2020/10/9 16:20
      */
-    protected function error($msg = '操作失败', $code = 0, $data = [])
+    protected function error(string $msg = '操作失败', int $code = 0, array $data = [])
     {
         $this->result($code, $data, $msg);
     }
@@ -220,7 +222,7 @@ class Edit extends BaseController
      * @author WX
      * @datetime 2020/10/9 16:20
      */
-    private function result($code, $data, $msg)
+    private function result(int $code, array $data, string $msg)
     {
         $data = [
             'code' => $code,

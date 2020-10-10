@@ -1,5 +1,7 @@
 <?php
 
+declare (strict_types = 1);
+
 namespace app\library;
 
 use think\Exception;
@@ -25,7 +27,7 @@ class Redis
      * @author WX
      * @datetime 2020/9/23 14:39
      */
-    public static function getClient($redis)
+    public static function getClient(string $redis)
     {
         if (isset(self::$clients[$redis]) && (self::$clients[$redis] instanceof \Redis)) {
             return self::$clients[$redis];
@@ -36,8 +38,8 @@ class Redis
                 throw new Exception('请先配置redis连接信息');
             }
             $host = $config['host'];
-            $port = isset($config['port']) ? $config['port'] : 6379;
-            $timeout = isset($config['timeout']) ? $config['timeout'] : 3;
+            $port = isset($config['port']) ? (int)$config['port'] : 6379;
+            $timeout = isset($config['timeout']) ? (float)$config['timeout'] : 3.0;
             $client->connect($host, $port, $timeout);
             if (isset($config['auth']) && $config['auth']) {
                 $client->auth($config['auth']);
@@ -57,7 +59,7 @@ class Redis
      * @author WX
      * @datetime 2020/9/23 15:17
      */
-    public static function getKeys($redis, $database, $filter = '*')
+    public static function getKeys(string $redis, int $database, string $filter = '*')
     {
         $client = self::getClient($redis);
         $client->select((int)$database);
@@ -85,7 +87,7 @@ class Redis
      * @author WX
      * @datetime 2020/9/23 15:06
      */
-    private static function getNodes($str)
+    private static function getNodes(string $str)
     {
         $nodesArr = explode("\n", $str);
         $nodes = [];
