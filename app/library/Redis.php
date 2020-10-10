@@ -5,9 +5,16 @@ namespace app\library;
 use think\Exception;
 use think\facade\Config;
 
+/**
+ * Class Redis
+ * @package app\library
+ */
 class Redis
 {
-    // redis客户端实例
+    /**
+     * redis客户端实例
+     * @var array
+     */
     private static $clients;
 
     /**

@@ -8,6 +8,10 @@ use app\library\Redis;
 use think\facade\View;
 use think\Exception;
 
+/**
+ * Class Index
+ * @package app\controller
+ */
 class Index extends BaseController
 {
     /**

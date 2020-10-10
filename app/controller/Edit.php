@@ -8,12 +8,20 @@ use think\Exception;
 use think\exception\HttpResponseException;
 use think\Response;
 
+/**
+ * Class Edit
+ * @package app\controller
+ */
 class Edit extends BaseController
 {
     /**
      * @var \Redis
      */
     protected $client;
+
+    /**
+     * @var string
+     */
     protected $key;
 
     /**

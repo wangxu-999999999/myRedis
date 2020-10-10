@@ -5,6 +5,10 @@ namespace app\library;
 use think\Exception;
 use think\facade\Config;
 
+/**
+ * Class RedisConfig
+ * @package app\library
+ */
 class RedisConfig
 {
     /**
