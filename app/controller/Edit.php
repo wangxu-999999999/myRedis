@@ -109,7 +109,7 @@ class Edit extends BaseController
      */
     public function editHash()
     {
-        $k = $this->request->post('k', '');
+        $k = (string)$this->request->post('k', '');
         $string = $this->request->post('string', '');
         if (($k !== '') && (false !== $this->client->hSet($this->key, $k, $string))) {
             $this->success();
