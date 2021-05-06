@@ -44,7 +44,7 @@
         <p class="p1">keys：&nbsp;&nbsp;&nbsp;&nbsp;<input id="reload" type="button" value="刷新" /></p>
         {volist name="keys" id="vo"}
         <div>
-            <p style="display:inline;"><i class="fa fa-trash del" style="color: red;" aria-hidden="true"></i></p>
+            <p style="display:inline;"><i class="fa fa-trash del" style="color: red;" data-value="{$vo}" aria-hidden="true"></i></p>
             <p class="key" data-value="{$vo}">{$vo}</p>
         </div>
         {/volist}
@@ -59,22 +59,22 @@
 
 <script src="/static/js/jquery-3.5.1.min.js"></script>
 <script>
-    let redis = $('.redis').data('value');
-    let database = $('.database').data('value');
-    $('.key').click(function (e) {
-        $('.key').each(function () {
-            $(this).css('background-color', '');
+    let redis = $(".redis").data("value");
+    let database = $(".database").data("value");
+    $(".key").click(function (e) {
+        $(".key").each(function () {
+            $(this).css("background-color", "");
         });
-        $(this).css('background-color', '#ffff00');
-        let key = $(this).data('value');
-        $("#myiframe").attr("src", '/index/detail/redis/' + redis + '/database/' + database +'/key/' + key);
+        $(this).css("background-color", "#ffff00");
+        let key = $(this).data("value");
+        $("#myiframe").attr("src", "/index/detail/redis/" + redis + "/database/" + database +"/key/" + key);
     });
-    $('#reload').click(function () {
+    $("#reload").click(function () {
         location.reload();
     });
-    $('.del').click(function () {
-        if (confirm('确定删除？')) {
-            let key = $(this).parent().next().data('value');
+    $(".del").click(function () {
+        if (confirm("确定删除？")) {
+            let key = $(this).data("value");
             $.ajax({
                 type : "POST",
                 async: false,
@@ -85,12 +85,12 @@
                 success : function(result) {
                     console.log(result);
                 },
-                error : function(e){
+                error : function(e) {
                     console.log(e.status);
                     console.log(e.responseText);
                 }
             });
-            $(this).parent().parent().remove();
+            $($(this).parents("div")[0]).remove();
         }
     });
     $(".redis").change(function() {
