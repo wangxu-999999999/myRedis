@@ -44,12 +44,13 @@
 </body>
 </html>
 <script type="text/javascript">
-    let redis = $('.redis', parent.document).data('value');
-    let database = $('.database', parent.document).data('value');
-    let key = $('.key').data('value');
-    $('.del').click(function () {
-        if (confirm('确定删除？')) {
-            let set = $(this).parent().next().children().children('textarea').val();
+    let redis = $(".redis", parent.document).data("value");
+    let database = $(".database", parent.document).data("value");
+    let key = $(".key").data("value");
+    $(".del").click(function () {
+        if (confirm("确定删除？")) {
+            let div = $($(this).parents("div")[0]);
+            let set = div.find("textarea").val();
             $.ajax({
                 type : "POST",
                 async: false,
@@ -65,15 +66,15 @@
                         alert(result.msg);
                     }
                 },
-                error : function(e){
+                error : function(e) {
                     console.log(e.status);
                     console.log(e.responseText);
                 }
             });
         }
     });
-    $('.ttl').click(function () {
-        let ttl = $('#ttl').val();
+    $(".ttl").click(function () {
+        let ttl = $("#ttl").val();
         $.ajax({
             type : "POST",
             async: false,
@@ -89,7 +90,7 @@
                     alert(result.msg);
                 }
             },
-            error : function(e){
+            error : function(e) {
                 console.log(e.status);
                 console.log(e.responseText);
             }
