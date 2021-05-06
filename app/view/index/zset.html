@@ -30,7 +30,7 @@
         {foreach $re as $k => $vo }
         <div class="item" style="margin-top: 8px;height: 60px;display:flex;">
             <div style="float: left;width: 60%;align-self:center;">
-                <p class="k" data-value="{$k}">
+                <p>
                     <label>
                         <textarea rows="3" style="width: 99%;" readonly>{$k|default=""}</textarea>
                     </label>
@@ -42,9 +42,9 @@
                     <input type="number" class="score" value="{$vo|default=''}" />
                 </p>
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                <p><input type="button" class="save" value="保存" /></p>
+                <p><input type="button" class="save" data-value="{$k}" value="保存" /></p>
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                <p><i class="fa fa-trash del" style="color: red;" aria-hidden="true"></i></p>
+                <p><i class="fa fa-trash del" style="color: red;" data-value="{$k}" aria-hidden="true"></i></p>
             </div>
         </div>
         {/foreach}
@@ -54,12 +54,13 @@
 </body>
 </html>
 <script type="text/javascript">
-    let redis = $('.redis', parent.document).data('value');
-    let database = $('.database', parent.document).data('value');
-    let key = $('.key').data('value');
-    $('.save').click(function () {
-        let k = $(this).parent().parent().prev().children('p').data('value');
-        let score = $(this).parent().prev().children('input').val();
+    let redis = $(".redis", parent.document).data("value");
+    let database = $(".database", parent.document).data("value");
+    let key = $(".key").data("value");
+    $(".save").click(function () {
+        let k = $(this).data("value");
+        let div = $($(this).parents("div")[0]);
+        let score = div.find(".score").val();
         $.ajax({
             type : "POST",
             async: false,
@@ -75,15 +76,15 @@
                     alert(result.msg);
                 }
             },
-            error : function(e){
+            error : function(e) {
                 console.log(e.status);
                 console.log(e.responseText);
             }
         });
     });
-    $('.del').click(function () {
-        if (confirm('确定删除？')) {
-            let k = $(this).parent().parent().prev().children('p').data('value');
+    $(".del").click(function () {
+        if (confirm("确定删除？")) {
+            let k = $(this).data("value");
             $.ajax({
                 type : "POST",
                 async: false,
@@ -99,15 +100,15 @@
                         alert(result.msg);
                     }
                 },
-                error : function(e){
+                error : function(e) {
                     console.log(e.status);
                     console.log(e.responseText);
                 }
             });
         }
     });
-    $('.ttl').click(function () {
-        let ttl = $('#ttl').val();
+    $(".ttl").click(function () {
+        let ttl = $("#ttl").val();
         $.ajax({
             type : "POST",
             async: false,
@@ -123,7 +124,7 @@
                     alert(result.msg);
                 }
             },
-            error : function(e){
+            error : function(e) {
                 console.log(e.status);
                 console.log(e.responseText);
             }
