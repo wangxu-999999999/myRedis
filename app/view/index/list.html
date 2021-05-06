@@ -29,9 +29,9 @@
     <div style="margin-top: 10px;">
         {foreach $re as $k => $vo }
         <div style="margin-top: 8px;">
-            <p class="k" data-value="{$k}">{$k}</p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-            <p><i class="fa fa-trash del" style="color: red;" aria-hidden="true"></i></p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-            <p><input type="button" class="save" value="保存" /></p>
+            <p>{$k}</p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <p><i class="fa fa-trash del" style="color: red;" data-value="{$k}" aria-hidden="true"></i></p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <p><input type="button" class="save" data-value="{$k}" value="保存" /></p>
             <p>
                 <label>
                     <textarea rows="3" style="width: 99%;height: 90%;" class="list">{$vo|default=""}</textarea>
@@ -45,12 +45,13 @@
 </body>
 </html>
 <script type="text/javascript">
-    let redis = $('.redis', parent.document).data('value');
-    let database = $('.database', parent.document).data('value');
-    let key = $('.key').data('value');
-    $('.save').click(function () {
-        let k = $(this).parent().prev().prev().data('value');
-        let string = $(this).parent().next().children().children('textarea').val();
+    let redis = $(".redis", parent.document).data("value");
+    let database = $(".database", parent.document).data("value");
+    let key = $(".key").data("value");
+    $(".save").click(function () {
+        let k = $(this).data("value");
+        let div = $($(this).parents("div")[0]);
+        let string = div.find("textarea").val();
         $.ajax({
             type : "POST",
             async: false,
@@ -66,15 +67,15 @@
                     alert(result.msg);
                 }
             },
-            error : function(e){
+            error : function(e) {
                 console.log(e.status);
                 console.log(e.responseText);
             }
         });
     });
-    $('.del').click(function () {
-        if (confirm('确定删除？')) {
-            let k = $(this).parent().prev().data('value');
+    $(".del").click(function () {
+        if (confirm("确定删除？")) {
+            let k = $(this).data("value");
             $.ajax({
                 type : "POST",
                 async: false,
@@ -90,15 +91,15 @@
                         alert(result.msg);
                     }
                 },
-                error : function(e){
+                error : function(e) {
                     console.log(e.status);
                     console.log(e.responseText);
                 }
             });
         }
     });
-    $('.ttl').click(function () {
-        let ttl = $('#ttl').val();
+    $(".ttl").click(function () {
+        let ttl = $("#ttl").val();
         $.ajax({
             type : "POST",
             async: false,
@@ -114,7 +115,7 @@
                     alert(result.msg);
                 }
             },
-            error : function(e){
+            error : function(e) {
                 console.log(e.status);
                 console.log(e.responseText);
             }
