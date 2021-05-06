@@ -35,11 +35,11 @@
 </body>
 </html>
 <script type="text/javascript">
-    let redis = $('.redis', parent.document).data('value');
-    let database = $('.database', parent.document).data('value');
-    let key = $('.key').data('value');
-    $('.save').click(function () {
-        let string = $('.string').val();
+    let redis = $(".redis", parent.document).data("value");
+    let database = $(".database", parent.document).data("value");
+    let key = $(".key").data("value");
+    $(".save").click(function () {
+        let string = $(".string").val();
         $.ajax({
             type : "POST",
             async: false,
@@ -55,14 +55,14 @@
                     alert(result.msg);
                 }
             },
-            error : function(e){
+            error : function(e) {
                 console.log(e.status);
                 console.log(e.responseText);
             }
         });
     });
-    $('.ttl').click(function () {
-        let ttl = $('#ttl').val();
+    $(".ttl").click(function () {
+        let ttl = $("#ttl").val();
         $.ajax({
             type : "POST",
             async: false,
@@ -78,7 +78,7 @@
                     alert(result.msg);
                 }
             },
-            error : function(e){
+            error : function(e) {
                 console.log(e.status);
                 console.log(e.responseText);
             }
