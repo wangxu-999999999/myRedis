@@ -50,7 +50,7 @@
         {/volist}
     </div>
     <div style="width: 79%;float: left;overflow: auto;height: 80vh;">
-        <iframe id="myiframe" src="/index/detail" width="99%" height="98%"></iframe>
+        <iframe id="my_iframe" src="/index/detail" title="" width="99%" height="98%"></iframe>
     </div>
 </div>
 
@@ -67,14 +67,16 @@
         });
         $(this).css("background-color", "#ffff00");
         let key = $(this).data("value");
-        $("#myiframe").attr("src", "/index/detail/redis/" + redis + "/database/" + database +"/key/" + key);
+        $("#my_iframe").attr("src", "/index/detail/redis/" + redis + "/database/" + database + "/key/" + key);
     });
     $("#reload").click(function () {
         location.reload();
     });
     $(".del").click(function () {
         if (confirm("确定删除？")) {
+            let myIframe = $("#my_iframe");
             let key = $(this).data("value");
+            let keySelected = myIframe.contents().find(".key").data("value");
             $.ajax({
                 type : "POST",
                 async: false,
@@ -91,6 +93,9 @@
                 }
             });
             $($(this).parents("div")[0]).remove();
+            if (key == keySelected) {
+                myIframe.attr('src', myIframe.attr('src'));
+            }
         }
     });
     $(".redis").change(function() {
